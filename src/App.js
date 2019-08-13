@@ -1,26 +1,50 @@
 import React from 'react';
-import logo from './logo.svg';
+import {withFormik, Form, Field} from 'formik';
+import * as Yup from 'yup';
 import './App.css';
 
-function App() {
+function App({errors, isSubmitting}) {
+  console.log(errors)
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Form>
+        {errors.email && <p>{errors.email}</p>}
+        <Field type='email' name='email' placeholder='Write your email'/>
+        {errors.password && <p>{errors.password}</p>}
+        <Field type='password' name='password' placeholder='Write your password'/>
+        <button disabled={isSubmitting && true} type='submit'> submit </button>
+      </Form>
     </div>
   );
 }
 
-export default App;
+export default withFormik({
+  mapPropsToValues({email, password}) {
+    return ({
+      email: email || '',
+      password: password || ''
+    })
+  },
+  validationSchema: Yup.object().shape({
+    email: Yup.string()
+      .email('It has to be correct')
+      .required(),
+    password: Yup.string()
+      .min(8)
+      .required()
+  }),
+  handleSubmit(values, {setSubmitting, setErrors, resetForm})  {
+    setTimeout(()=>{
+      console.log(values)
+      if(values.email === '1@1.com') {
+        setErrors({
+          email: 'email already taken'
+        })
+      } else {
+        console.log('todo ok')
+        resetForm()
+      }
+      setSubmitting(false);
+    },2000)
+  }
+ })(App);
